@@ -45,9 +45,31 @@ uiLayer.innerHTML = `
         }
         #main-menu p {
             color: #bca88e; font-size: 18px; font-style: italic; margin-top: 10px; 
-            margin-bottom: 50px; letter-spacing: 2px; text-align: center;
+            margin-bottom: 40px; letter-spacing: 2px; text-align: center;
         }
         
+        #level-select-container {
+            margin-top: 30px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        #level-select-container p {
+            margin-bottom: 15px; font-size: 14px; letter-spacing: 2px; color: #aa801e;
+        }
+        #level-grid {
+            display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: 400px;
+        }
+        .level-btn {
+            background: transparent; border: 1px solid #aa801e; color: #d4af37;
+            width: 44px; height: 44px; border-radius: 4px; font-family: 'Palatino Linotype', serif;
+            font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.2s;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            padding: 0; display: flex; justify-content: center; align-items: center;
+        }
+        .level-btn:hover {
+            background: rgba(212, 175, 55, 0.15); transform: translateY(-2px); 
+            border-color: #ffdf73; color: #ffdf73; box-shadow: 0 4px 8px rgba(212, 175, 55, 0.2);
+        }
+
         #hud {
             position: absolute; top: 15px; left: 15px; z-index: 100; pointer-events: auto;
             display: none; 
@@ -121,6 +143,11 @@ uiLayer.innerHTML = `
             <h1>Signal & Sanctuary</h1>
             <p>A puzzle of spatial harmony.</p>
             <button id="start-btn">Begin Journey</button>
+            
+            <div id="level-select-container">
+                <p>— OR SELECT A PHASE —</p>
+                <div id="level-grid"></div>
+            </div>
         </div>
 
         <div id="hud">
@@ -157,6 +184,7 @@ document.body.appendChild(uiLayer);
 
 const mainMenu = document.getElementById('main-menu');
 const startBtn = document.getElementById('start-btn');
+const levelGrid = document.getElementById('level-grid');
 const hud = document.getElementById('hud');
 
 const statusText = document.getElementById('status-text');
@@ -213,18 +241,6 @@ async function init() {
     } catch (err) {
         console.warn("Assets not found. Check your /assets/ folder.");
     }
-
-    // --- GAME START & AUDIO UNLOCKER ---
-    startBtn?.addEventListener('click', () => {
-        if (mainMenu) mainMenu.style.display = 'none';
-        if (hud) hud.style.display = 'block';
-        
-        if (sound.exists('bgm')) {
-            sound.play('bgm', { loop: true, volume: 0.3 }); 
-        }
-        
-        loadLevel(0);
-    });
 
     // --- GRID & LAYER SETUP ---
     let COLUMNS = 8, ROWS = 8, TILE_SIZE = 0, offsetX = 0, offsetY = 0;
@@ -383,6 +399,31 @@ async function init() {
         }
     ];
 
+    // --- GAME START & LEVEL SELECT LOGIC ---
+    function startGame(index: number) {
+        if (mainMenu) mainMenu.style.display = 'none';
+        if (hud) hud.style.display = 'block';
+        
+        if (sound.exists('bgm')) {
+            sound.play('bgm', { loop: true, volume: 0.3 }); 
+        }
+        
+        currentLevelIndex = index;
+        loadLevel(currentLevelIndex);
+    }
+
+    startBtn?.addEventListener('click', () => startGame(0));
+
+    if (levelGrid) {
+        levels.forEach((_, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'level-btn';
+            btn.innerText = (index + 1).toString();
+            btn.addEventListener('click', () => startGame(index));
+            levelGrid.appendChild(btn);
+        });
+    }
+
     // --- TUTORIAL LOGIC ---
     function playTutorialSequence(messages: string[]) {
         if (!tutorialDialog || !tutorialText) return;
@@ -497,8 +538,8 @@ async function init() {
     if (restartBtn) {
         restartBtn.addEventListener('click', () => {
             if (endDialog) endDialog.close();
-            currentLevelIndex = 0;
-            loadLevel(currentLevelIndex);
+            if (hud) hud.style.display = 'none';
+            if (mainMenu) mainMenu.style.display = 'flex';
         });
     }
 
@@ -534,8 +575,11 @@ async function init() {
                     container.y += (targetY - container.y) * 0.25;
                 }
                 
-                container.width = (TILE_SIZE * maxDim) - (TILE_SIZE * 0.2);
-                container.height = (TILE_SIZE * maxDim) - (TILE_SIZE * 0.2);
+                const child = container.children[0];
+                if (child) {
+                    child.width = (TILE_SIZE * maxDim) - (TILE_SIZE * 0.2);
+                    child.height = (TILE_SIZE * maxDim) - (TILE_SIZE * 0.2);
+                }
                 
                 if (Rotation.angle[eid] !== undefined) {
                     container.rotation += (Rotation.angle[eid] - container.rotation) * 0.2;
