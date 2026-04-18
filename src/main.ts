@@ -121,7 +121,7 @@ async function init() {
 
         roomBackground.clear();
         roomBackground.rect(offsetX, offsetY, COLUMNS * TILE_SIZE, ROWS * TILE_SIZE)
-                      .fill(0x2a2a2a).stroke({ width: 2, color: 0x444444 });
+                      .fill(0xcd853f).stroke({ width: 2, color: 0x444444 });
         app.stage.hitArea = new Rectangle(0, 0, window.innerWidth, window.innerHeight);
     }
     window.addEventListener('resize', calculateGridBounds);
