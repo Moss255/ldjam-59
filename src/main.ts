@@ -26,42 +26,81 @@ const spriteMap = new Map<number, Container>();
 const uiLayer = document.createElement('div');
 uiLayer.innerHTML = `
     <style>
-        body { margin: 0; overflow: hidden; background-color: #1a1a1a; }
+        body { margin: 0; overflow: hidden; background-color: #120f14; }
+        
         #ui-layer {
             position: absolute; top: 15px; left: 15px; z-index: 100; pointer-events: none;
-            font-family: 'Courier New', Courier, monospace; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+            color: #fdf6e3; text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
         }
-        h2 { margin: 0; font-size: 16px; letter-spacing: 1px; }
-        #level-title { font-size: 11px; color: #aaa; margin-top: 2px; margin-bottom: 8px; }
-        #status-text { font-size: 12px; font-weight: bold; }
-        #signal-bar-container { width: 150px; height: 10px; background: #333; border: 1px solid #fff; margin-top: 4px; }
-        #signal-bar-fill { width: 0%; height: 100%; background: #ff0000; transition: width 0.2s, background-color 0.2s; }
+        h2 { margin: 0; font-size: 18px; letter-spacing: 1.5px; color: #d4af37; }
+        #level-title { font-size: 13px; color: #bca88e; margin-top: 4px; margin-bottom: 10px; font-style: italic; }
+        #status-text { font-size: 14px; font-weight: bold; letter-spacing: 0.5px; }
+        
+        #signal-bar-container { 
+            width: 160px; height: 12px; background: #2a2122; 
+            border: 2px solid #d4af37; border-radius: 6px; 
+            margin-top: 6px; overflow: hidden; 
+            box-shadow: 0 0 5px rgba(212, 175, 55, 0.3); 
+        }
+        #signal-bar-fill { 
+            width: 0%; height: 100%; background: #c0392b; 
+            transition: width 0.3s ease, background-color 0.3s ease; 
+        }
         
         dialog {
-            background: rgba(26, 26, 26, 0.95); border: 2px solid #00ff00; border-radius: 8px;
-            color: white; text-align: center; padding: 30px 50px; font-family: 'Courier New', Courier, monospace;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+            background: #1a1525; border: 2px solid #d4af37; border-radius: 12px;
+            color: #fdf6e3; text-align: center; padding: 40px 60px; 
+            font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.2), inset 0 0 20px rgba(0,0,0,0.8); 
+            max-width: 450px;
         }
-        dialog::backdrop { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(2px); }
-        dialog h1 { color: #00ff00; font-size: 24px; text-transform: uppercase; margin-top: 0; letter-spacing: 2px; }
-        dialog p { color: #ccc; font-size: 14px; margin-bottom: 25px; }
+        dialog::backdrop { background: rgba(10, 8, 15, 0.85); backdrop-filter: blur(4px); }
+        dialog h1 { 
+            color: #d4af37; font-size: 26px; text-transform: uppercase; 
+            margin-top: 0; letter-spacing: 3px; 
+            border-bottom: 1px solid #d4af37; padding-bottom: 10px; 
+        }
+        dialog p { color: #e6dac3; font-size: 16px; margin-bottom: 30px; line-height: 1.6; }
         
-        #next-level-btn { 
-            background: #00ff00; color: #000; border: none; padding: 12px 24px; 
-            font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 4px; text-transform: uppercase;
+        button { 
+            background: linear-gradient(135deg, #d4af37, #aa801e); color: #1a1525; 
+            border: 1px solid #ffdf73; padding: 12px 28px; 
+            font-size: 15px; font-weight: bold; cursor: pointer; border-radius: 6px; 
+            text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5); transition: all 0.2s;
         }
-        #next-level-btn:hover { background: #00cc00; }
+        button:hover { 
+            background: linear-gradient(135deg, #ffdf73, #d4af37); 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 12px rgba(212, 175, 55, 0.3); 
+        }
+        button:active { transform: translateY(1px); }
     </style>
+    
     <div id="ui-layer">
         <h2>Signal & Sanctuary</h2>
         <div id="level-title"></div>
         <div id="status-text">Signal: 0%</div>
         <div id="signal-bar-container"><div id="signal-bar-fill"></div></div>
     </div>
+
+    <dialog id="tutorial-dialog">
+        <h1 id="tutorial-title">Guide</h1>
+        <p id="tutorial-text"></p>
+        <button id="tutorial-next-btn">Continue</button>
+    </dialog>
+
     <dialog id="win-dialog">
-        <h1>Harmonic Resonance</h1>
-        <p>The space is balanced. Qi flows freely.</p>
+        <h1>Perfect Balance</h1>
+        <p>The room is calm.</p>
         <button id="next-level-btn">Next Phase</button>
+    </dialog>
+
+    <dialog id="end-dialog">
+        <h1>Sanctuary Complete</h1>
+        <p>Thank you for playing. All rooms are now balanced.</p>
+        <button id="restart-btn">Restart Journey</button>
     </dialog>
 `;
 document.body.appendChild(uiLayer);
@@ -72,13 +111,21 @@ const winDialog = document.getElementById('win-dialog') as HTMLDialogElement;
 const nextLevelBtn = document.getElementById('next-level-btn');
 const levelTitleText = document.getElementById('level-title');
 
+const tutorialDialog = document.getElementById('tutorial-dialog') as HTMLDialogElement;
+const tutorialText = document.getElementById('tutorial-text');
+let tutorialNextBtn = document.getElementById('tutorial-next-btn');
+
+const endDialog = document.getElementById('end-dialog') as HTMLDialogElement;
+const restartBtn = document.getElementById('restart-btn');
+
 let currentLevelIndex = 0;
 let isLevelComplete = false;
+let tutorialQueue: string[] = [];
 
 // --- INITIALISATION ---
 async function init() {
     const app = new Application();
-    await app.init({ resizeTo: window, backgroundColor: 0x1a1a1a, resolution: window.devicePixelRatio || 1, autoDensity: true });
+    await app.init({ resizeTo: window, backgroundColor: 0x120f14, resolution: window.devicePixelRatio || 1, autoDensity: true });
     document.body.appendChild(app.canvas as HTMLCanvasElement);
     (app.canvas as HTMLCanvasElement).style.touchAction = 'none';
     app.stage.eventMode = 'static';
@@ -121,19 +168,24 @@ async function init() {
 
         roomBackground.clear();
         roomBackground.rect(offsetX, offsetY, COLUMNS * TILE_SIZE, ROWS * TILE_SIZE)
-                      .fill(0xcd853f).stroke({ width: 2, color: 0x444444 });
+                      .fill(0xcd853f).stroke({ width: 2, color: 0x444444 }); 
         app.stage.hitArea = new Rectangle(0, 0, window.innerWidth, window.innerHeight);
     }
     window.addEventListener('resize', calculateGridBounds);
 
     // --- LEVEL DATA ---
     interface EntityData { x: number, y: number, w: number, h: number, type: number, col: number, asset: string, interactive: boolean }
-    interface LevelData { name: string, cols: number, rows: number, entities: EntityData[] }
+    interface LevelData { name: string, cols: number, rows: number, tutorial?: string[], entities: EntityData[] }
 
     const levels: LevelData[] = [
         {
-            name: "Level 1: The Direct Path (Tutorial)",
+            name: "Phase 1: The Direct Path",
             cols: 6, rows: 4,
+            tutorial: [
+                "Welcome. 'Qi' is the natural flow of light and air. A room must feel open.",
+                "A wooden screen blocks the light from the lantern to the cushion. This causes stress.",
+                "Drag the screen away. Let the light reach the cushion to balance the room."
+            ],
             entities: [
                 { x: 0, y: 1, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
                 { x: 5, y: 1, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
@@ -141,7 +193,7 @@ async function init() {
             ]
         },
         {
-            name: "Level 2: Reflection & Filtering (Beginner)",
+            name: "Phase 2: Reflection & Filtering",
             cols: 8, rows: 8,
             entities: [
                 { x: 0, y: 6, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
@@ -154,12 +206,11 @@ async function init() {
             ]
         },
         {
-            name: "Level 3: The Broken Space (Advanced)",
+            name: "Phase 3: The Broken Space",
             cols: 10, rows: 8,
             entities: [
                 { x: 0, y: 2, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
                 { x: 9, y: 7, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
-                // Split the wall into individual 1x1 segments
                 { x: 4, y: 0, w: 1, h: 1, type: 4, col: 0x555555, asset: 'wall', interactive: false },
                 { x: 4, y: 1, w: 1, h: 1, type: 4, col: 0x555555, asset: 'wall', interactive: false },
                 { x: 4, y: 2, w: 1, h: 1, type: 4, col: 0x555555, asset: 'wall', interactive: false },
@@ -168,7 +219,6 @@ async function init() {
                 { x: 4, y: 5, w: 1, h: 1, type: 4, col: 0x555555, asset: 'wall', interactive: false },
                 { x: 4, y: 6, w: 1, h: 1, type: 4, col: 0x555555, asset: 'wall', interactive: false },
                 { x: 4, y: 7, w: 1, h: 1, type: 4, col: 0x555555, asset: 'wall', interactive: false },
-                // Tools
                 { x: 1, y: 2, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true },
                 { x: 7, y: 2, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true },
                 { x: 8, y: 5, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
@@ -178,6 +228,33 @@ async function init() {
             ]
         }
     ];
+
+    // --- TUTORIAL LOGIC ---
+    function playTutorialSequence(messages: string[]) {
+        if (!tutorialDialog || !tutorialText) return;
+        
+        tutorialQueue = [...messages];
+        
+        const showNextMessage = () => {
+            if (tutorialQueue.length > 0) {
+                tutorialText.innerText = tutorialQueue.shift()!;
+                tutorialDialog.showModal();
+            } else {
+                tutorialDialog.close();
+            }
+        };
+
+        if (tutorialNextBtn) {
+            tutorialNextBtn.replaceWith(tutorialNextBtn.cloneNode(true));
+            tutorialNextBtn = document.getElementById('tutorial-next-btn');
+            tutorialNextBtn?.addEventListener('click', () => {
+                tutorialDialog.close(); 
+                setTimeout(showNextMessage, 50); 
+            });
+        }
+
+        showNextMessage();
+    }
 
     function loadLevel(index: number) {
         const oldEntities = query(world, [GridPosition]);
@@ -197,10 +274,15 @@ async function init() {
         if (levelTitleText) levelTitleText.innerText = level.name;
         isLevelComplete = false;
         if (winDialog) winDialog.close();
+        if (endDialog) endDialog.close();
 
         level.entities.forEach(data => {
             spawnEntity(data.x, data.y, data.w, data.h, data.type, data.col, data.asset, data.interactive);
         });
+
+        if (level.tutorial && level.tutorial.length > 0) {
+            playTutorialSequence(level.tutorial);
+        }
     }
 
     // --- GAME STATE ---
@@ -210,25 +292,40 @@ async function init() {
         const finalStrength = Math.max(0, Math.min(100, Math.floor(strength)));
         statusText.innerText = `Signal: ${finalStrength}%`;
         signalBarFill.style.width = `${finalStrength}%`;
-        signalBarFill.style.backgroundColor = finalStrength < 40 ? '#ff4444' : finalStrength < 80 ? '#ffaa00' : '#00ff00'; 
+        
+        signalBarFill.style.backgroundColor = finalStrength < 40 ? '#c0392b' : finalStrength < 80 ? '#d4af37' : '#00ced1'; 
 
         if (finalStrength >= 80 && !isLevelComplete) {
             isLevelComplete = true;
-            winDialog.showModal();
+            
             if (currentLevelIndex >= levels.length - 1 && nextLevelBtn) {
-                nextLevelBtn.innerText = "Game Complete!";
-                nextLevelBtn.style.pointerEvents = "none";
+                nextLevelBtn.innerText = "Complete Journey";
+            } else if (nextLevelBtn) {
+                nextLevelBtn.innerText = "Next Phase";
             }
+            
+            winDialog.showModal();
         } 
     }
 
+    // --- EVENT LISTENERS ---
     if (nextLevelBtn) {
         nextLevelBtn.addEventListener('click', () => {
+            winDialog.close();
             if (currentLevelIndex < levels.length - 1) {
-                winDialog.close();
                 currentLevelIndex++;
                 loadLevel(currentLevelIndex);
+            } else {
+                if (endDialog) endDialog.showModal();
             }
+        });
+    }
+
+    if (restartBtn) {
+        restartBtn.addEventListener('click', () => {
+            if (endDialog) endDialog.close();
+            currentLevelIndex = 0;
+            loadLevel(currentLevelIndex);
         });
     }
 
@@ -361,7 +458,12 @@ async function init() {
         }
 
         updateGameState(hitReceiver ? maxReceiverStrength : 0);
-        signalLine.stroke({ width: 6, color: maxReceiverStrength >= 80 ? 0x00ff00 : (maxReceiverStrength > 40 ? 0xffaa00 : 0xff4444), alpha: 0.8 });
+        
+        signalLine.stroke({ 
+            width: 6, 
+            color: maxReceiverStrength >= 80 ? 0x00ced1 : (maxReceiverStrength > 40 ? 0xd4af37 : 0xc0392b), 
+            alpha: 0.8 
+        });
         return world;
     };
 
