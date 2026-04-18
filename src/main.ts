@@ -9,6 +9,14 @@ import {
     removeEntity
 } from 'bitecs';
 
+// --- MOBILE VIEWPORT LOCK ---
+if (!document.querySelector('meta[name="viewport"]')) {
+    const meta = document.createElement('meta');
+    meta.name = 'viewport';
+    meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+    document.head.appendChild(meta);
+}
+
 // --- BITECS SETUP ---
 const world = createWorld();
 
@@ -27,7 +35,10 @@ const spriteMap = new Map<number, Container>();
 const uiLayer = document.createElement('div');
 uiLayer.innerHTML = `
     <style>
-        body { margin: 0; overflow: hidden; background-color: #120f14; }
+        html, body { 
+            width: 100%; height: 100%; margin: 0; padding: 0; 
+            overflow: hidden; touch-action: none; background-color: #120f14; 
+        }
         
         #ui-layer {
             font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
@@ -35,13 +46,14 @@ uiLayer.innerHTML = `
         }
 
         #main-menu {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, #2a2122 0%, #120f14 100%);
             z-index: 500; display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
         #main-menu h1 {
-            color: #d4af37; font-size: 54px; text-transform: uppercase; letter-spacing: 8px; 
+            color: #d4af37; font-size: clamp(32px, 8vw, 54px); text-transform: uppercase; letter-spacing: 8px; 
             margin-bottom: 0px; text-shadow: 0 0 20px rgba(212, 175, 55, 0.4); text-align: center;
+            padding: 0 20px;
         }
         #main-menu p {
             color: #bca88e; font-size: 18px; font-style: italic; margin-top: 10px; 
@@ -56,7 +68,7 @@ uiLayer.innerHTML = `
             margin-bottom: 15px; font-size: 14px; letter-spacing: 2px; color: #aa801e;
         }
         #level-grid {
-            display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: 400px;
+            display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: 400px; padding: 0 20px;
         }
         .level-btn {
             background: transparent; border: 1px solid #aa801e; color: #d4af37;
@@ -92,16 +104,25 @@ uiLayer.innerHTML = `
             transition: width 0.3s ease, background-color 0.3s ease; 
         }
 
-        #toggle-vision-btn {
+        #hud-controls {
             margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            max-width: 160px;
+        }
+
+        #toggle-vision-btn, #toggle-audio-btn {
             padding: 6px 12px;
             font-size: 11px;
             background: transparent;
             border: 1px solid #bca88e;
             color: #bca88e;
             box-shadow: none;
+            cursor: pointer;
+            border-radius: 4px;
         }
-        #toggle-vision-btn:hover {
+        #toggle-vision-btn:hover, #toggle-audio-btn:hover {
             background: rgba(188, 168, 142, 0.2);
             color: #fdf6e3;
             border-color: #fdf6e3;
@@ -109,20 +130,20 @@ uiLayer.innerHTML = `
         
         dialog {
             background: #1a1525; border: 2px solid #d4af37; border-radius: 12px;
-            color: #fdf6e3; text-align: center; padding: 40px 60px; 
+            color: #fdf6e3; text-align: center; padding: 40px 30px; 
             font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
             box-shadow: 0 0 40px rgba(212, 175, 55, 0.2), inset 0 0 20px rgba(0,0,0,0.8); 
-            max-width: 450px;
+            width: 80%; max-width: 400px;
         }
         dialog::backdrop { background: rgba(10, 8, 15, 0.85); backdrop-filter: blur(4px); }
         dialog h1 { 
-            color: #d4af37; font-size: 26px; text-transform: uppercase; 
+            color: #d4af37; font-size: 24px; text-transform: uppercase; 
             margin-top: 0; letter-spacing: 3px; 
             border-bottom: 1px solid #d4af37; padding-bottom: 10px; 
         }
-        dialog p { color: #e6dac3; font-size: 16px; margin-bottom: 30px; line-height: 1.6; }
+        dialog p { color: #e6dac3; font-size: 15px; margin-bottom: 30px; line-height: 1.6; }
         
-        button { 
+        button.primary-btn { 
             background: linear-gradient(135deg, #d4af37, #aa801e); color: #1a1525; 
             border: 1px solid #ffdf73; padding: 12px 28px; 
             font-size: 15px; font-weight: bold; cursor: pointer; border-radius: 6px; 
@@ -130,19 +151,19 @@ uiLayer.innerHTML = `
             box-shadow: 0 4px 6px rgba(0,0,0,0.5); transition: all 0.2s;
             pointer-events: auto;
         }
-        button:hover { 
+        button.primary-btn:hover { 
             background: linear-gradient(135deg, #ffdf73, #d4af37); 
             transform: translateY(-2px); 
             box-shadow: 0 6px 12px rgba(212, 175, 55, 0.3); 
         }
-        button:active { transform: translateY(1px); }
+        button.primary-btn:active { transform: translateY(1px); }
     </style>
     
     <div id="ui-layer">
         <div id="main-menu">
             <h1>Signal & Sanctuary</h1>
             <p>A puzzle of spatial harmony.</p>
-            <button id="start-btn">Begin Journey</button>
+            <button id="start-btn" class="primary-btn">Begin Journey</button>
             
             <div id="level-select-container">
                 <p>— OR SELECT A PHASE —</p>
@@ -158,25 +179,28 @@ uiLayer.innerHTML = `
                 <div id="status-label">BLOCKED</div>
             </div>
             <div id="signal-bar-container"><div id="signal-bar-fill"></div></div>
-            <button id="toggle-vision-btn">Enable Signal Mode</button>
+            <div id="hud-controls">
+                <button id="toggle-vision-btn">Enable Signal Mode</button>
+                <button id="toggle-audio-btn">Mute Audio</button>
+            </div>
         </div>
 
         <dialog id="tutorial-dialog">
             <h1 id="tutorial-title">Guide</h1>
             <p id="tutorial-text"></p>
-            <button id="tutorial-next-btn">Continue</button>
+            <button id="tutorial-next-btn" class="primary-btn">Continue</button>
         </dialog>
 
         <dialog id="win-dialog">
             <h1>Perfect Balance</h1>
             <p>The room is calm.</p>
-            <button id="next-level-btn">Next Phase</button>
+            <button id="next-level-btn" class="primary-btn">Next Phase</button>
         </dialog>
 
         <dialog id="end-dialog">
             <h1>Sanctuary Complete</h1>
             <p>Thank you for playing. All rooms are now balanced.</p>
-            <button id="restart-btn">Restart Journey</button>
+            <button id="restart-btn" class="primary-btn">Restart Journey</button>
         </dialog>
     </div>
 `;
@@ -191,6 +215,7 @@ const statusText = document.getElementById('status-text');
 const statusLabel = document.getElementById('status-label');
 const signalBarFill = document.getElementById('signal-bar-fill');
 const toggleVisionBtn = document.getElementById('toggle-vision-btn');
+const toggleAudioBtn = document.getElementById('toggle-audio-btn');
 const winDialog = document.getElementById('win-dialog') as HTMLDialogElement;
 const nextLevelBtn = document.getElementById('next-level-btn');
 const levelTitleText = document.getElementById('level-title');
@@ -205,12 +230,15 @@ const restartBtn = document.getElementById('restart-btn');
 let currentLevelIndex = 0;
 let isLevelComplete = false;
 let tutorialQueue: string[] = [];
+let isAudioMuted = false;
 
 // --- INITIALISATION ---
 async function init() {
     const app = new Application();
     await app.init({ resizeTo: window, backgroundColor: 0x120f14, resolution: window.devicePixelRatio || 1, autoDensity: true });
     document.body.appendChild(app.canvas as HTMLCanvasElement);
+    
+    // Strict mobile touch lock for canvas
     (app.canvas as HTMLCanvasElement).style.touchAction = 'none';
     app.stage.eventMode = 'static';
     
@@ -241,6 +269,30 @@ async function init() {
     } catch (err) {
         console.warn("Assets not found. Check your /assets/ folder.");
     }
+
+    // --- AUDIO TOGGLE LOGIC ---
+    toggleAudioBtn?.addEventListener('click', () => {
+        isAudioMuted = !isAudioMuted;
+        if (isAudioMuted) {
+            sound.muteAll();
+            if (toggleAudioBtn) toggleAudioBtn.innerText = "Unmute Audio";
+        } else {
+            sound.unmuteAll();
+            if (toggleAudioBtn) toggleAudioBtn.innerText = "Mute Audio";
+        }
+    });
+
+    // --- GAME START & AUDIO UNLOCKER ---
+    startBtn?.addEventListener('click', () => {
+        if (mainMenu) mainMenu.style.display = 'none';
+        if (hud) hud.style.display = 'block';
+        
+        if (sound.exists('bgm')) {
+            sound.play('bgm', { loop: true, volume: 0.3 }); 
+        }
+        
+        loadLevel(0);
+    });
 
     // --- GRID & LAYER SETUP ---
     let COLUMNS = 8, ROWS = 8, TILE_SIZE = 0, offsetX = 0, offsetY = 0;
@@ -275,10 +327,11 @@ async function init() {
     });
 
     function calculateGridBounds() {
-        const margin = 120; 
+        // Reduced margin slightly for mobile screens
+        const margin = window.innerWidth < 600 ? 80 : 120; 
         TILE_SIZE = Math.floor(Math.min(window.innerWidth, window.innerHeight - margin) / Math.max(COLUMNS, ROWS));
         offsetX = Math.floor((window.innerWidth - (COLUMNS * TILE_SIZE)) / 2);
-        offsetY = Math.floor((window.innerHeight - (ROWS * TILE_SIZE)) / 2) + 40; 
+        offsetY = Math.floor((window.innerHeight - (ROWS * TILE_SIZE)) / 2) + 20; 
 
         roomBackground.clear();
         roomBackground.rect(offsetX, offsetY, COLUMNS * TILE_SIZE, ROWS * TILE_SIZE)
@@ -404,15 +457,13 @@ async function init() {
         if (mainMenu) mainMenu.style.display = 'none';
         if (hud) hud.style.display = 'block';
         
-        if (sound.exists('bgm')) {
+        if (sound.exists('bgm') && !isAudioMuted) {
             sound.play('bgm', { loop: true, volume: 0.3 }); 
         }
         
         currentLevelIndex = index;
         loadLevel(currentLevelIndex);
     }
-
-    startBtn?.addEventListener('click', () => startGame(0));
 
     if (levelGrid) {
         levels.forEach((_, index) => {
@@ -510,7 +561,7 @@ async function init() {
             isLevelComplete = true;
             triggerWinParticles();
             
-            if (sound.exists('sfx_win')) sound.play('sfx_win', { volume: 1.0 });
+            if (sound.exists('sfx_win') && !isAudioMuted) sound.play('sfx_win', { volume: 1.0 });
             
             if (currentLevelIndex >= levels.length - 1 && nextLevelBtn) {
                 nextLevelBtn.innerText = "Complete Journey";
@@ -563,22 +614,26 @@ async function init() {
             const eid = entities[i];
             const container = spriteMap.get(eid);
             if (container) {
-                const w = Dimensions.width[eid] || 1;
-                const h = Dimensions.height[eid] || 1;
-                const maxDim = Math.max(w, h); 
+                const currentW = Dimensions.width[eid] || 1;
+                const currentH = Dimensions.height[eid] || 1;
 
                 if (Draggable.isDragging[eid] === 0) {
-                    const targetX = offsetX + (GridPosition.x[eid] * TILE_SIZE) + ((TILE_SIZE * w) / 2);
-                    const targetY = offsetY + (GridPosition.y[eid] * TILE_SIZE) + ((TILE_SIZE * h) / 2);
+                    const targetX = offsetX + (GridPosition.x[eid] * TILE_SIZE) + ((TILE_SIZE * currentW) / 2);
+                    const targetY = offsetY + (GridPosition.y[eid] * TILE_SIZE) + ((TILE_SIZE * currentH) / 2);
                     
                     container.x += (targetX - container.x) * 0.25;
                     container.y += (targetY - container.y) * 0.25;
                 }
                 
+                // Fetch the original unrotated dimensions saved during spawn
+                const baseW = (container as any).baseW || 1;
+                const baseH = (container as any).baseH || 1;
+                
                 const child = container.children[0];
                 if (child) {
-                    child.width = (TILE_SIZE * maxDim) - (TILE_SIZE * 0.2);
-                    child.height = (TILE_SIZE * maxDim) - (TILE_SIZE * 0.2);
+                    // Scale inner child strictly to its original aspect ratio
+                    child.width = (TILE_SIZE * baseW) - (TILE_SIZE * 0.1);
+                    child.height = (TILE_SIZE * baseH) - (TILE_SIZE * 0.1);
                 }
                 
                 if (Rotation.angle[eid] !== undefined) {
@@ -719,6 +774,10 @@ async function init() {
         addComponent(world, eid, Draggable); Draggable.isDragging[eid] = 0;
         
         const container = new Container();
+        
+        // Save the original unrotated dimensions to the container
+        (container as any).baseW = w;
+        (container as any).baseH = h;
 
         try {
             if (Assets.cache.has(assetAlias)) {
@@ -745,7 +804,7 @@ async function init() {
                 Draggable.isDragging[eid] = 1; dragStartX = e.global.x; dragStartY = e.global.y;
                 originalGridX = GridPosition.x[eid]; originalGridY = GridPosition.y[eid]; container.alpha = 0.7;
                 
-                if (sound.exists('sfx_pickup')) sound.play('sfx_pickup', { volume: 0.6 });
+                if (sound.exists('sfx_pickup') && !isAudioMuted) sound.play('sfx_pickup', { volume: 0.6 });
             });
 
             container.on('globalpointermove', (e) => {
@@ -764,7 +823,7 @@ async function init() {
                             Dimensions.width[eid] = newW; Dimensions.height[eid] = newH;
                             Rotation.angle[eid] += Math.PI / 2;
                             
-                            if (sound.exists('sfx_rotate')) sound.play('sfx_rotate', { volume: 0.7 });
+                            if (sound.exists('sfx_rotate') && !isAudioMuted) sound.play('sfx_rotate', { volume: 0.7 });
                         }
                     } else {
                         const topLeftXPx = (container.x - offsetX) - ((TILE_SIZE * currentW) / 2);
@@ -778,7 +837,7 @@ async function init() {
                             GridPosition.x[eid] = targetX; GridPosition.y[eid] = targetY;
                         }
                         
-                        if (sound.exists('sfx_drop')) sound.play('sfx_drop', { volume: 0.8 });
+                        if (sound.exists('sfx_drop') && !isAudioMuted) sound.play('sfx_drop', { volume: 0.8 });
                     }
                 }
             };
