@@ -1,5 +1,6 @@
 // File: src/main.ts
 import { Application, Graphics, Rectangle, Container, Assets, Sprite } from 'pixi.js';
+import { sound } from '@pixi/sound'; 
 import { 
     createWorld, 
     query, 
@@ -29,23 +30,59 @@ uiLayer.innerHTML = `
         body { margin: 0; overflow: hidden; background-color: #120f14; }
         
         #ui-layer {
-            position: absolute; top: 15px; left: 15px; z-index: 100; pointer-events: none;
             font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
             color: #fdf6e3; text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
         }
-        h2 { margin: 0; font-size: 18px; letter-spacing: 1.5px; color: #d4af37; }
-        #level-title { font-size: 13px; color: #bca88e; margin-top: 4px; margin-bottom: 10px; font-style: italic; }
-        #status-text { font-size: 14px; font-weight: bold; letter-spacing: 0.5px; }
+
+        #main-menu {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at center, #2a2122 0%, #120f14 100%);
+            z-index: 500; display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        #main-menu h1 {
+            color: #d4af37; font-size: 54px; text-transform: uppercase; letter-spacing: 8px; 
+            margin-bottom: 0px; text-shadow: 0 0 20px rgba(212, 175, 55, 0.4); text-align: center;
+        }
+        #main-menu p {
+            color: #bca88e; font-size: 18px; font-style: italic; margin-top: 10px; 
+            margin-bottom: 50px; letter-spacing: 2px; text-align: center;
+        }
+        
+        #hud {
+            position: absolute; top: 15px; left: 15px; z-index: 100; pointer-events: auto;
+            display: none; 
+        }
+        #hud h2 { margin: 0; font-size: 18px; letter-spacing: 1.5px; color: #d4af37; pointer-events: none; }
+        #level-title { font-size: 13px; color: #bca88e; margin-top: 4px; margin-bottom: 10px; font-style: italic; pointer-events: none; }
+        
+        #status-text { font-size: 14px; font-weight: bold; letter-spacing: 0.5px; pointer-events: none; }
+        #status-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: bold; pointer-events: none; }
         
         #signal-bar-container { 
             width: 160px; height: 12px; background: #2a2122; 
             border: 2px solid #d4af37; border-radius: 6px; 
             margin-top: 6px; overflow: hidden; 
             box-shadow: 0 0 5px rgba(212, 175, 55, 0.3); 
+            pointer-events: none;
         }
         #signal-bar-fill { 
             width: 0%; height: 100%; background: #c0392b; 
             transition: width 0.3s ease, background-color 0.3s ease; 
+        }
+
+        #toggle-vision-btn {
+            margin-top: 12px;
+            padding: 6px 12px;
+            font-size: 11px;
+            background: transparent;
+            border: 1px solid #bca88e;
+            color: #bca88e;
+            box-shadow: none;
+        }
+        #toggle-vision-btn:hover {
+            background: rgba(188, 168, 142, 0.2);
+            color: #fdf6e3;
+            border-color: #fdf6e3;
         }
         
         dialog {
@@ -69,6 +106,7 @@ uiLayer.innerHTML = `
             font-size: 15px; font-weight: bold; cursor: pointer; border-radius: 6px; 
             text-transform: uppercase; letter-spacing: 1px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.5); transition: all 0.2s;
+            pointer-events: auto;
         }
         button:hover { 
             background: linear-gradient(135deg, #ffdf73, #d4af37); 
@@ -79,34 +117,52 @@ uiLayer.innerHTML = `
     </style>
     
     <div id="ui-layer">
-        <h2>Signal & Sanctuary</h2>
-        <div id="level-title"></div>
-        <div id="status-text">Signal: 0%</div>
-        <div id="signal-bar-container"><div id="signal-bar-fill"></div></div>
+        <div id="main-menu">
+            <h1>Signal & Sanctuary</h1>
+            <p>A puzzle of spatial harmony.</p>
+            <button id="start-btn">Begin Journey</button>
+        </div>
+
+        <div id="hud">
+            <h2>Signal & Sanctuary</h2>
+            <div id="level-title"></div>
+            <div style="display: flex; align-items: baseline; gap: 12px;">
+                <div id="status-text">Signal: 0%</div>
+                <div id="status-label">BLOCKED</div>
+            </div>
+            <div id="signal-bar-container"><div id="signal-bar-fill"></div></div>
+            <button id="toggle-vision-btn">Enable Signal Mode</button>
+        </div>
+
+        <dialog id="tutorial-dialog">
+            <h1 id="tutorial-title">Guide</h1>
+            <p id="tutorial-text"></p>
+            <button id="tutorial-next-btn">Continue</button>
+        </dialog>
+
+        <dialog id="win-dialog">
+            <h1>Perfect Balance</h1>
+            <p>The room is calm.</p>
+            <button id="next-level-btn">Next Phase</button>
+        </dialog>
+
+        <dialog id="end-dialog">
+            <h1>Sanctuary Complete</h1>
+            <p>Thank you for playing. All rooms are now balanced.</p>
+            <button id="restart-btn">Restart Journey</button>
+        </dialog>
     </div>
-
-    <dialog id="tutorial-dialog">
-        <h1 id="tutorial-title">Guide</h1>
-        <p id="tutorial-text"></p>
-        <button id="tutorial-next-btn">Continue</button>
-    </dialog>
-
-    <dialog id="win-dialog">
-        <h1>Perfect Balance</h1>
-        <p>The room is calm.</p>
-        <button id="next-level-btn">Next Phase</button>
-    </dialog>
-
-    <dialog id="end-dialog">
-        <h1>Sanctuary Complete</h1>
-        <p>Thank you for playing. All rooms are now balanced.</p>
-        <button id="restart-btn">Restart Journey</button>
-    </dialog>
 `;
 document.body.appendChild(uiLayer);
 
+const mainMenu = document.getElementById('main-menu');
+const startBtn = document.getElementById('start-btn');
+const hud = document.getElementById('hud');
+
 const statusText = document.getElementById('status-text');
+const statusLabel = document.getElementById('status-label');
 const signalBarFill = document.getElementById('signal-bar-fill');
+const toggleVisionBtn = document.getElementById('toggle-vision-btn');
 const winDialog = document.getElementById('win-dialog') as HTMLDialogElement;
 const nextLevelBtn = document.getElementById('next-level-btn');
 const levelTitleText = document.getElementById('level-title');
@@ -143,22 +199,64 @@ async function init() {
         { alias: 'portal', src: './assets/portal.png' },
         { alias: 'dampener', src: './assets/dampener.png' },
         { alias: 'splitter', src: './assets/splitter.png' },
-        { alias: 'poison', src: './assets/poison.png' }
+        { alias: 'poison', src: './assets/poison.png' },
+        { alias: 'bgm', src: './assets/bgm.mp3' },            
+        { alias: 'sfx_pickup', src: './assets/pickup.mp3' },  
+        { alias: 'sfx_drop', src: './assets/drop.mp3' },      
+        { alias: 'sfx_rotate', src: './assets/rotate.mp3' },  
+        { alias: 'sfx_win', src: './assets/win.mp3' } 
     ];
 
     try {
         assetsToLoad.forEach(asset => Assets.add(asset));
         await Assets.load(assetsToLoad.map(a => a.alias));
     } catch (err) {
-        console.warn("Assets not found. Using coloured box fallbacks. Ensure your SVGs are exported as PNGs to the /assets/ folder.");
+        console.warn("Assets not found. Check your /assets/ folder.");
     }
 
-    // --- GRID SETUP ---
+    // --- GAME START & AUDIO UNLOCKER ---
+    startBtn?.addEventListener('click', () => {
+        if (mainMenu) mainMenu.style.display = 'none';
+        if (hud) hud.style.display = 'block';
+        
+        if (sound.exists('bgm')) {
+            sound.play('bgm', { loop: true, volume: 0.3 }); 
+        }
+        
+        loadLevel(0);
+    });
+
+    // --- GRID & LAYER SETUP ---
     let COLUMNS = 8, ROWS = 8, TILE_SIZE = 0, offsetX = 0, offsetY = 0;
+    
     const roomBackground = new Graphics();
     app.stage.addChild(roomBackground);
+    
+    const entityLayer = new Container();
+    app.stage.addChild(entityLayer);
+    
+    const darknessOverlay = new Graphics();
+    darknessOverlay.eventMode = 'none'; 
+    darknessOverlay.visible = false;
+    app.stage.addChild(darknessOverlay);
+    
     const signalLine = new Graphics();
+    signalLine.eventMode = 'none';      
     app.stage.addChild(signalLine);
+
+    const particleContainer = new Container();
+    particleContainer.eventMode = 'none'; 
+    app.stage.addChild(particleContainer);
+
+    let isSignalMode = false;
+
+    toggleVisionBtn?.addEventListener('click', () => {
+        isSignalMode = !isSignalMode;
+        darknessOverlay.visible = isSignalMode;
+        if (toggleVisionBtn) {
+            toggleVisionBtn.innerText = isSignalMode ? "Disable Signal Mode" : "Enable Signal Mode";
+        }
+    });
 
     function calculateGridBounds() {
         const margin = 120; 
@@ -170,8 +268,64 @@ async function init() {
         roomBackground.rect(offsetX, offsetY, COLUMNS * TILE_SIZE, ROWS * TILE_SIZE)
                       .fill(0xcd853f).stroke({ width: 2, color: 0x444444 }); 
         app.stage.hitArea = new Rectangle(0, 0, window.innerWidth, window.innerHeight);
+
+        darknessOverlay.clear();
+        darknessOverlay.rect(0, 0, window.innerWidth, window.innerHeight)
+                       .fill({ color: 0x0a0815, alpha: 0.75 }); 
     }
     window.addEventListener('resize', calculateGridBounds);
+
+    // --- PARTICLE SYSTEM ---
+    interface Particle { sprite: Graphics, vx: number, vy: number, life: number, decay: number }
+    const particles: Particle[] = [];
+
+    function triggerWinParticles() {
+        const entities = query(world, [GridPosition, ObjectType]);
+        let targetX = window.innerWidth / 2, targetY = window.innerHeight / 2; 
+        
+        for (let i = 0; i < entities.length; i++) {
+            if (ObjectType.type[entities[i]] === 1) { 
+                targetX = offsetX + (GridPosition.x[entities[i]] * TILE_SIZE) + (TILE_SIZE / 2);
+                targetY = offsetY + (GridPosition.y[entities[i]] * TILE_SIZE) + (TILE_SIZE / 2);
+                break;
+            }
+        }
+
+        for (let i = 0; i < 40; i++) {
+            const p = new Graphics();
+            p.rect(-4, -4, 8, 8).fill(Math.random() > 0.5 ? 0x00ced1 : 0xd4af37);
+            p.x = targetX; p.y = targetY;
+            p.rotation = Math.random() * Math.PI;
+            particleContainer.addChild(p);
+
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 6 + 2;
+            particles.push({
+                sprite: p,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 1.0,
+                decay: Math.random() * 0.02 + 0.015
+            });
+        }
+    }
+
+    function updateParticles() {
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.sprite.x += p.vx;
+            p.sprite.y += p.vy;
+            p.sprite.rotation += 0.1;
+            p.life -= p.decay;
+            p.sprite.alpha = Math.max(0, p.life);
+            
+            if (p.life <= 0) {
+                particleContainer.removeChild(p.sprite);
+                p.sprite.destroy();
+                particles.splice(i, 1);
+            }
+        }
+    }
 
     // --- LEVEL DATA ---
     interface EntityData { x: number, y: number, w: number, h: number, type: number, col: number, asset: string, interactive: boolean }
@@ -261,7 +415,7 @@ async function init() {
         for (let i = 0; i < oldEntities.length; i++) {
             const eid = oldEntities[i];
             const sprite = spriteMap.get(eid);
-            if (sprite) { app.stage.removeChild(sprite); sprite.destroy({ children: true }); }
+            if (sprite) { entityLayer.removeChild(sprite); sprite.destroy({ children: true }); }
             spriteMap.delete(eid);
             removeEntity(world, eid);
         }
@@ -293,10 +447,29 @@ async function init() {
         statusText.innerText = `Signal: ${finalStrength}%`;
         signalBarFill.style.width = `${finalStrength}%`;
         
-        signalBarFill.style.backgroundColor = finalStrength < 40 ? '#c0392b' : finalStrength < 80 ? '#d4af37' : '#00ced1'; 
+        let hexColor = '#c0392b'; 
+        let labelText = 'BLOCKED';
+
+        if (finalStrength >= 80) {
+            hexColor = '#00ced1'; 
+            labelText = 'HARMONIC';
+        } else if (finalStrength >= 40) {
+            hexColor = '#d4af37'; 
+            labelText = 'FLOWING';
+        }
+
+        signalBarFill.style.backgroundColor = hexColor;
+        
+        if (statusLabel) {
+            statusLabel.innerText = labelText;
+            statusLabel.style.color = hexColor;
+        }
 
         if (finalStrength >= 80 && !isLevelComplete) {
             isLevelComplete = true;
+            triggerWinParticles();
+            
+            if (sound.exists('sfx_win')) sound.play('sfx_win', { volume: 1.0 });
             
             if (currentLevelIndex >= levels.length - 1 && nextLevelBtn) {
                 nextLevelBtn.innerText = "Complete Journey";
@@ -354,15 +527,18 @@ async function init() {
                 const maxDim = Math.max(w, h); 
 
                 if (Draggable.isDragging[eid] === 0) {
-                    container.x = offsetX + (GridPosition.x[eid] * TILE_SIZE) + ((TILE_SIZE * w) / 2);
-                    container.y = offsetY + (GridPosition.y[eid] * TILE_SIZE) + ((TILE_SIZE * h) / 2);
+                    const targetX = offsetX + (GridPosition.x[eid] * TILE_SIZE) + ((TILE_SIZE * w) / 2);
+                    const targetY = offsetY + (GridPosition.y[eid] * TILE_SIZE) + ((TILE_SIZE * h) / 2);
+                    
+                    container.x += (targetX - container.x) * 0.25;
+                    container.y += (targetY - container.y) * 0.25;
                 }
                 
                 container.width = (TILE_SIZE * maxDim) - (TILE_SIZE * 0.2);
                 container.height = (TILE_SIZE * maxDim) - (TILE_SIZE * 0.2);
                 
                 if (Rotation.angle[eid] !== undefined) {
-                    container.rotation = Rotation.angle[eid];
+                    container.rotation += (Rotation.angle[eid] - container.rotation) * 0.2;
                 }
             }
         }
@@ -459,11 +635,33 @@ async function init() {
 
         updateGameState(hitReceiver ? maxReceiverStrength : 0);
         
-        signalLine.stroke({ 
-            width: 6, 
-            color: maxReceiverStrength >= 80 ? 0x00ced1 : (maxReceiverStrength > 40 ? 0xd4af37 : 0xc0392b), 
-            alpha: 0.8 
-        });
+        let beamThickness = 6;
+        let beamAlpha = 0.5;
+        let beamColor = 0xc0392b;
+
+        if (maxReceiverStrength >= 80) {
+            beamColor = 0x00ced1; 
+            beamThickness = 10;   
+            beamAlpha = Math.sin(Date.now() / 150) * 0.2 + 0.8; 
+        } else if (maxReceiverStrength > 40) {
+            beamColor = 0xd4af37; 
+            beamThickness = 6;
+            beamAlpha = Math.sin(Date.now() / 300) * 0.15 + 0.6; 
+        } else {
+            beamThickness = 4;    
+            beamAlpha = 0.3;      
+        }
+        
+        if (isSignalMode) {
+            signalLine.stroke({ width: beamThickness * 3, color: beamColor, alpha: beamAlpha * 0.2 });
+            signalLine.stroke({ width: beamThickness, color: beamColor, alpha: beamAlpha });
+            if (maxReceiverStrength > 40) {
+                signalLine.stroke({ width: beamThickness * 0.3, color: 0xffffff, alpha: 0.9 });
+            }
+        } else {
+            signalLine.stroke({ width: beamThickness, color: beamColor, alpha: beamAlpha });
+        }
+        
         return world;
     };
 
@@ -491,6 +689,9 @@ async function init() {
             graphics.rect(-50, -50, 100, 100).fill(fallbackCol);
             container.addChild(graphics);
         }
+
+        container.x = offsetX + (x * TILE_SIZE) + ((TILE_SIZE * w) / 2);
+        container.y = offsetY + (y * TILE_SIZE) + ((TILE_SIZE * h) / 2);
         
         if (interactive) {
             container.eventMode = 'static'; container.cursor = 'pointer';
@@ -499,6 +700,8 @@ async function init() {
             container.on('pointerdown', (e) => {
                 Draggable.isDragging[eid] = 1; dragStartX = e.global.x; dragStartY = e.global.y;
                 originalGridX = GridPosition.x[eid]; originalGridY = GridPosition.y[eid]; container.alpha = 0.7;
+                
+                if (sound.exists('sfx_pickup')) sound.play('sfx_pickup', { volume: 0.6 });
             });
 
             container.on('globalpointermove', (e) => {
@@ -516,6 +719,8 @@ async function init() {
                         if (originalGridX + newW <= COLUMNS && originalGridY + newH <= ROWS && !isAreaOccupied(originalGridX, originalGridY, newW, newH, eid)) {
                             Dimensions.width[eid] = newW; Dimensions.height[eid] = newH;
                             Rotation.angle[eid] += Math.PI / 2;
+                            
+                            if (sound.exists('sfx_rotate')) sound.play('sfx_rotate', { volume: 0.7 });
                         }
                     } else {
                         const topLeftXPx = (container.x - offsetX) - ((TILE_SIZE * currentW) / 2);
@@ -528,16 +733,23 @@ async function init() {
                         } else {
                             GridPosition.x[eid] = targetX; GridPosition.y[eid] = targetY;
                         }
+                        
+                        if (sound.exists('sfx_drop')) sound.play('sfx_drop', { volume: 0.8 });
                     }
                 }
             };
             container.on('pointerup', onPointerRelease); container.on('pointerupoutside', onPointerRelease);
         }
-        app.stage.addChild(container); spriteMap.set(eid, container);
+        
+        entityLayer.addChild(container); 
+        spriteMap.set(eid, container);
     }
 
-    loadLevel(0);
-    app.ticker.add(() => { renderSystem(world); raycastSystem(world); });
+    app.ticker.add(() => { 
+        renderSystem(world); 
+        raycastSystem(world); 
+        updateParticles();
+    });
 }
 
 init();
