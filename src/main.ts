@@ -28,6 +28,7 @@ export const Rotation = { angle: [] as number[] };
 // 6: Crystal, 7: Portal, 8: Dampener, 9: Splitter
 export const ObjectType = { type: [] as number[] };
 export const Draggable = { isDragging: [] as number[] };
+export const Interactable = { isInteractable: [] as number[] };
 
 const spriteMap = new Map<number, Container>();
 
@@ -263,12 +264,17 @@ async function init() {
         { alias: 'sfx_win', src: './assets/win.mp3' } 
     ];
 
-    try {
-        assetsToLoad.forEach(asset => Assets.add(asset));
-        await Assets.load(assetsToLoad.map(a => a.alias));
-    } catch (err) {
-        console.warn("Assets not found. Check your /assets/ folder.");
-    }
+    // Add all assets to the cache configuration
+    assetsToLoad.forEach(asset => Assets.add(asset));
+
+    // Progressively load each asset and handle errors individually
+    await Promise.all(assetsToLoad.map(async (asset) => {
+        try {
+            await Assets.load(asset.alias);
+        } catch (err) {
+            console.warn(`Asset failed to load: ${asset.alias}. Continuing with fallback.`);
+        }
+    }));
 
     // --- AUDIO TOGGLE LOGIC ---
     toggleAudioBtn?.addEventListener('click', () => {
@@ -590,11 +596,39 @@ async function init() {
                 const baseW = (container as any).baseW || 1;
                 const baseH = (container as any).baseH || 1;
                 
-                const child = container.children[0];
-                if (child) {
-                    // Scale inner child strictly to its original aspect ratio
-                    child.width = (TILE_SIZE * baseW) - (TILE_SIZE * 0.1);
-                    child.height = (TILE_SIZE * baseH) - (TILE_SIZE * 0.1);
+                const spriteContainer = container.children[1] as Container;
+                if (spriteContainer && spriteContainer.children[0]) {
+                    const child = spriteContainer.children[0] as any;
+                    const targetW = (TILE_SIZE * baseW) - (TILE_SIZE * 0.1);
+                    const targetH = (TILE_SIZE * baseH) - (TILE_SIZE * 0.1);
+                    
+                    if (child.texture && child.texture.width > 0) {
+                        const texW = child.texture.width;
+                        const texH = child.texture.height;
+                        const scaleFactor = Math.min(targetW / texW, targetH / texH);
+                        child.scale.set(scaleFactor);
+                    } else {
+                        child.width = targetW;
+                        child.height = targetH;
+                    }
+                }
+
+                // Handle the dynamic interactivity indicator
+                const indicator = container.children[0] as Graphics;
+                if (indicator) {
+                    const isInteractive = Interactable.isInteractable[eid] === 1;
+                    const wPx = (TILE_SIZE * baseW) - (TILE_SIZE * 0.1);
+                    const hPx = (TILE_SIZE * baseH) - (TILE_SIZE * 0.1);
+                    
+                    indicator.clear();
+                    if (isInteractive) {
+                        indicator.roundRect(-wPx / 2, -hPx / 2, wPx, hPx, 8)
+                                 .stroke({ width: 2, color: 0xd4af37, alpha: Math.sin(Date.now() / 200) * 0.3 + 0.5 });
+                    } else {
+                        indicator.roundRect(-wPx / 2, -hPx / 2, wPx, hPx, 8)
+                                 .stroke({ width: 2, color: 0x444444, alpha: 0.8 })
+                                 .fill({ color: 0x1a1525, alpha: 0.5 });
+                    }
                 }
                 
                 if (Rotation.angle[eid] !== undefined) {
@@ -733,6 +767,7 @@ async function init() {
         addComponent(world, eid, ObjectType); ObjectType.type[eid] = type;
         addComponent(world, eid, Rotation); Rotation.angle[eid] = 0;
         addComponent(world, eid, Draggable); Draggable.isDragging[eid] = 0;
+        addComponent(world, eid, Interactable); Interactable.isInteractable[eid] = interactive ? 1 : 0;
         
         const container = new Container();
         
@@ -740,19 +775,28 @@ async function init() {
         (container as any).baseW = w;
         (container as any).baseH = h;
 
+        // Base plate/indicator for interactivity rendering
+        const indicator = new Graphics();
+        container.addChild(indicator);
+
+        // Sub-container specifically for the visual sprite/graphic so it scales independently of the indicator logic
+        const spriteContainer = new Container();
+        
         try {
             if (Assets.cache.has(assetAlias)) {
                 const sprite = Sprite.from(assetAlias);
                 sprite.anchor.set(0.5); 
-                container.addChild(sprite);
+                spriteContainer.addChild(sprite);
             } else {
                 throw new Error("Asset not in cache");
             }
         } catch (e) {
             const graphics = new Graphics();
             graphics.rect(-50, -50, 100, 100).fill(fallbackCol);
-            container.addChild(graphics);
+            spriteContainer.addChild(graphics);
         }
+
+        container.addChild(spriteContainer);
 
         container.x = offsetX + (x * TILE_SIZE) + ((TILE_SIZE * w) / 2);
         container.y = offsetY + (y * TILE_SIZE) + ((TILE_SIZE * h) / 2);
