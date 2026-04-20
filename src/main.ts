@@ -296,7 +296,8 @@ async function init() {
             sound.play('bgm', { loop: true, volume: 0.3 }); 
         }
         
-        loadLevel(0);
+        currentLevelIndex = 0;
+        loadLevel(currentLevelIndex);
     });
 
     // --- GRID & LAYER SETUP ---
