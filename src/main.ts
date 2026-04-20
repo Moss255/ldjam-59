@@ -109,8 +109,7 @@ uiLayer.innerHTML = `
             margin-top: 12px;
             display: flex;
             gap: 8px;
-            flex-wrap: wrap;
-            max-width: 160px;
+            flex-wrap: nowrap;
         }
 
         #toggle-vision-btn, #toggle-audio-btn {
@@ -122,6 +121,7 @@ uiLayer.innerHTML = `
             box-shadow: none;
             cursor: pointer;
             border-radius: 4px;
+            white-space: nowrap;
         }
         #toggle-vision-btn:hover, #toggle-audio-btn:hover {
             background: rgba(188, 168, 142, 0.2);
@@ -528,7 +528,7 @@ async function init() {
             isLevelComplete = true;
             triggerWinParticles();
             
-            if (sound.exists('sfx_win') && !isAudioMuted) sound.play('sfx_win', { volume: 1.0 });
+            if (sound.exists('sfx_win') && !isAudioMuted) sound.play('sfx_win', { volume: 0.5 });
             
             if (currentLevelIndex >= levels.length - 1 && nextLevelBtn) {
                 nextLevelBtn.innerText = "Complete Journey";
@@ -818,7 +818,7 @@ async function init() {
                 Draggable.isDragging[eid] = 1; dragStartX = e.global.x; dragStartY = e.global.y;
                 originalGridX = GridPosition.x[eid]; originalGridY = GridPosition.y[eid]; container.alpha = 0.7;
                 
-                if (sound.exists('sfx_pickup') && !isAudioMuted) sound.play('sfx_pickup', { volume: 0.6 });
+                if (sound.exists('sfx_pickup') && !isAudioMuted) sound.play('sfx_pickup', { volume: 0.2 });
             });
 
             container.on('globalpointermove', (e) => {
@@ -837,7 +837,7 @@ async function init() {
                             Dimensions.width[eid] = newW; Dimensions.height[eid] = newH;
                             Rotation.angle[eid] += Math.PI / 2;
                             
-                            if (sound.exists('sfx_rotate') && !isAudioMuted) sound.play('sfx_rotate', { volume: 0.7 });
+                            if (sound.exists('sfx_rotate') && !isAudioMuted) sound.play('sfx_rotate', { volume: 0.25 });
                         }
                     } else {
                         const topLeftXPx = (container.x - offsetX) - ((TILE_SIZE * currentW) / 2);
@@ -851,7 +851,7 @@ async function init() {
                             GridPosition.x[eid] = targetX; GridPosition.y[eid] = targetY;
                         }
                         
-                        if (sound.exists('sfx_drop') && !isAudioMuted) sound.play('sfx_drop', { volume: 0.8 });
+                        if (sound.exists('sfx_drop') && !isAudioMuted) sound.play('sfx_drop', { volume: 0.3 });
                     }
                 }
             };
