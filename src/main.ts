@@ -406,18 +406,167 @@ async function init() {
     interface EntityData { x: number, y: number, w: number, h: number, type: number, col: number, asset: string, interactive: boolean }
     interface LevelData { name: string, cols: number, rows: number, tutorial?: string[], entities: EntityData[] }
 
-  const levels: LevelData[] = [
-        { name: "Phase 1: Direct Path", cols: 6, rows: 4, tutorial: ["Welcome. Guide light from the Lantern to the Cushion.", "Drag the desk away to clear the path."], entities: [{ x: 0, y: 1, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false }, { x: 5, y: 1, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false }, { x: 2, y: 0, w: 1, h: 2, type: 4, col: 0x8b4513, asset: 'desk', interactive: true }, { x: 4, y: 1, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: true }] },
-        { name: "Phase 2: The Turn", cols: 6, rows: 6, tutorial: ["Mirrors bounce light 90 degrees.", "TAP an item to rotate it. Drag it into the light."], entities: [{ x: 1, y: 4, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false }, { x: 4, y: 1, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false }, { x: 4, y: 4, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true }, { x: 3, y: 1, w: 1, h: 2, type: 4, col: 0x555555, asset: 'sofa', interactive: true }] },
-        { name: "Phase 3: Vitality", cols: 12, rows: 5, tutorial: ["Signals weaken over distance.", "Pass the light through a Plant to boost its strength."], entities: [{ x: 0, y: 2, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false }, { x: 11, y: 2, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false }, { x: 3, y: 2, w: 1, h: 1, type: 3, col: 0x00ff00, asset: 'plant', interactive: true }, { x: 5, y: 0, w: 1, h: 1, type: 4, col: 0x555555, asset: 'desk', interactive: true }, { x: 9, y: 2, w: 1, h: 2, type: 4, col: 0x555555, asset: 'desk', interactive: true }] },
-        { name: "Phase 4: The Star Splitter", cols: 7, rows: 7, tutorial: ["Splitters divide one beam into two.", "Combine their strength to reach the goal."], entities: [{ x: 3, y: 6, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false }, { x: 3, y: 0, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false }, { x: 3, y: 3, w: 1, h: 1, type: 9, col: 0xaaaaaa, asset: 'splitter', interactive: true }, { x: 1, y: 3, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true }, { x: 5, y: 3, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true }, { x: 1, y: 1, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true }, { x: 5, y: 1, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true }, { x: 1, y: 5, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: true }] },
-        { name: "Phase 5: The Spatial Bridge", cols: 9, rows: 5, tutorial: ["Astrolabes link two distant spots.", "Use them to pass through solid obstacles."], entities: [{ x: 0, y: 2, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false }, { x: 8, y: 2, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false }, { x: 4, y: 0, w: 1, h: 5, type: 4, col: 0x555555, asset: 'desk', interactive: false }, { x: 2, y: 2, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true }, { x: 6, y: 2, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true }, { x: 7, y: 2, w: 1, h: 2, type: 4, col: 0x555555, asset: 'sofa', interactive: true }] },
-        { name: "Phase 6: Amplification", cols: 8, rows: 8, entities: [{ x: 0, y: 7, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false }, { x: 7, y: 0, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false }, { x: 0, y: 0, w: 1, h: 1, type: 6, col: 0xffd700, asset: 'crystal', interactive: true }, { x: 7, y: 7, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true }, { x: 6, y: 0, w: 1, h: 2, type: 4, col: 0x555555, asset: 'sofa', interactive: true }, { x: 7, y: 6, w: 1, h: 2, type: 4, col: 0x555555, asset: 'desk', interactive: true }] },
-        { name: "Phase 7: The Course", cols: 10, rows: 6, entities: [{ x: 0, y: 2, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false }, { x: 9, y: 2, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false }, { x: 4, y: 2, w: 2, h: 1, type: 5, col: 0x8b0000, asset: 'poison', interactive: false }, { x: 4, y: 0, w: 1, h: 1, type: 6, col: 0xffd700, asset: 'crystal', interactive: true }, { x: 2, y: 0, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true }, { x: 7, y: 0, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true }, { x: 2, y: 2, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true }, { x: 7, y: 2, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true }, { x: 1, y: 2, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: true }, { x: 8, y: 2, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: true }] },
-        { name: "Phase 8: Divided", cols: 8, rows: 8, entities: [{ x: 3, y: 7, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false }, { x: 4, y: 0, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false }, { x: 0, y: 4, w: 8, h: 1, type: 4, col: 0x555555, asset: 'desk', interactive: false }, { x: 0, y: 2, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true }, { x: 7, y: 6, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true }, { x: 3, y: 2, w: 1, h: 1, type: 3, col: 0x00ff00, asset: 'plant', interactive: true }, { x: 4, y: 7, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true }, { x: 4, y: 1, w: 1, h: 2, type: 4, col: 0x555555, asset: 'desk', interactive: true }] },
-        { name: "Phase 9: Grand Hall", cols: 10, rows: 10, entities: [{ x: 0, y: 0, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false }, { x: 9, y: 9, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false }, { x: 5, y: 5, w: 1, h: 1, type: 9, col: 0xaaaaaa, asset: 'splitter', interactive: true }, { x: 2, y: 5, w: 1, h: 1, type: 6, col: 0xffd700, asset: 'crystal', interactive: true }, { x: 8, y: 5, w: 1, h: 1, type: 3, col: 0x00ff00, asset: 'plant', interactive: true }, { x: 0, y: 9, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true }, { x: 9, y: 0, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true }, { x: 1, y: 0, w: 2, h: 1, type: 4, col: 0x555555, asset: 'sofa', interactive: true }, { x: 9, y: 8, w: 1, h: 2, type: 4, col: 0x555555, asset: 'desk', interactive: true }] },
-        { name: "Phase 10: Mastery", cols: 12, rows: 10, entities: [{ x: 0, y: 0, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false }, { x: 11, y: 9, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false }, { x: 6, y: 0, w: 1, h: 10, type: 4, col: 0x555555, asset: 'desk', interactive: false }, { x: 3, y: 0, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true }, { x: 9, y: 9, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true }, { x: 1, y: 5, w: 1, h: 1, type: 6, col: 0xffd700, asset: 'crystal', interactive: true }, { x: 10, y: 5, w: 1, h: 1, type: 3, col: 0x00ff00, asset: 'plant', interactive: true }, { x: 2, y: 0, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: true }, { x: 10, y: 9, w: 1, h: 2, type: 4, col: 0x555555, asset: 'sofa', interactive: true }] }
-    ];
+const levels: LevelData[] = [
+  {
+    name: "Phase 1: Direct Path",
+    cols: 6,
+    rows: 4,
+    tutorial: [
+      "Welcome. Guide light from the Lantern to the Cushion.",
+      "Drag the desk away to clear the path."
+    ],
+    entities: [
+      { x: 0, y: 1, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
+      { x: 5, y: 1, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
+      { x: 2, y: 0, w: 1, h: 2, type: 4, col: 0x8b4513, asset: 'desk', interactive: true },
+      { x: 4, y: 1, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: true }
+    ]
+  },
+  {
+    name: "Phase 2: The Turn",
+    cols: 6,
+    rows: 6,
+    tutorial: [
+      "Mirrors bounce light 90 degrees.",
+      "TAP an item to rotate it. Drag it into the light."
+    ],
+    entities: [
+      { x: 1, y: 4, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
+      { x: 4, y: 1, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
+      { x: 4, y: 4, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 3, y: 1, w: 1, h: 2, type: 4, col: 0x555555, asset: 'sofa', interactive: true }
+    ]
+  },
+  {
+    name: "Phase 3: Vitality",
+    cols: 12,
+    rows: 5,
+    tutorial: [
+      "Signals weaken over distance.",
+      "Pass the light through a Plant to boost its strength."
+    ],
+    entities: [
+      { x: 0, y: 2, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
+      { x: 11, y: 2, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
+      { x: 3, y: 2, w: 1, h: 1, type: 3, col: 0x00ff00, asset: 'plant', interactive: true },
+      { x: 5, y: 0, w: 1, h: 1, type: 4, col: 0x555555, asset: 'desk', interactive: true },
+      { x: 9, y: 2, w: 1, h: 2, type: 4, col: 0x555555, asset: 'desk', interactive: true }
+    ]
+  },
+  {
+    name: "Phase 4: The Star Splitter",
+    cols: 7,
+    rows: 7,
+    tutorial: [
+      "Splitters divide one beam into two.",
+      "Combine their strength to reach the goal."
+    ],
+    entities: [
+      { x: 3, y: 6, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
+      { x: 3, y: 0, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
+      { x: 3, y: 3, w: 1, h: 1, type: 9, col: 0xaaaaaa, asset: 'splitter', interactive: true },
+      { x: 1, y: 3, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 5, y: 3, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 1, y: 1, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 5, y: 1, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 1, y: 5, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: true }
+    ]
+  },
+  {
+    name: "Phase 5: The Spatial Bridge",
+    cols: 9,
+    rows: 5,
+    tutorial: [
+      "Astrolabes link two distant spots.",
+      "Use them to pass through solid obstacles."
+    ],
+    entities: [
+      { x: 0, y: 2, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
+      { x: 8, y: 2, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
+      { x: 4, y: 0, w: 1, h: 5, type: 4, col: 0x555555, asset: 'desk', interactive: false },
+      { x: 2, y: 2, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true },
+      { x: 6, y: 2, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true },
+      { x: 7, y: 2, w: 1, h: 2, type: 4, col: 0x555555, asset: 'sofa', interactive: true }
+    ]
+  },
+  {
+    name: "Phase 6: Amplification",
+    cols: 8,
+    rows: 8,
+    entities: [
+      { x: 0, y: 7, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
+      { x: 7, y: 0, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
+      { x: 0, y: 0, w: 1, h: 1, type: 6, col: 0xffd700, asset: 'crystal', interactive: true },
+      { x: 7, y: 7, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 6, y: 0, w: 1, h: 2, type: 4, col: 0x555555, asset: 'sofa', interactive: true },
+      { x: 7, y: 6, w: 1, h: 2, type: 4, col: 0x555555, asset: 'desk', interactive: true }
+    ]
+  },
+  {
+    name: "Phase 7: The Course",
+    cols: 10,
+    rows: 6,
+    entities: [
+      { x: 0, y: 2, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
+      { x: 9, y: 2, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
+      { x: 4, y: 2, w: 2, h: 1, type: 5, col: 0x8b0000, asset: 'poison', interactive: false },
+      { x: 4, y: 0, w: 1, h: 1, type: 6, col: 0xffd700, asset: 'crystal', interactive: true },
+      { x: 2, y: 0, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 7, y: 0, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 2, y: 2, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 7, y: 2, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 1, y: 2, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: true },
+      { x: 8, y: 2, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: true }
+    ]
+  },
+  {
+    name: "Phase 8: Divided",
+    cols: 8,
+    rows: 8,
+    entities: [
+      { x: 3, y: 7, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
+      { x: 4, y: 0, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
+      { x: 0, y: 4, w: 8, h: 1, type: 4, col: 0x555555, asset: 'desk', interactive: false },
+      { x: 0, y: 2, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true },
+      { x: 7, y: 6, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true },
+      { x: 3, y: 2, w: 1, h: 1, type: 3, col: 0x00ff00, asset: 'plant', interactive: true },
+      { x: 4, y: 7, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 4, y: 1, w: 1, h: 2, type: 4, col: 0x555555, asset: 'desk', interactive: true }
+    ]
+  },
+  {
+    name: "Phase 9: Grand Hall",
+    cols: 10,
+    rows: 10,
+    entities: [
+      { x: 0, y: 0, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
+      { x: 9, y: 9, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
+      { x: 5, y: 5, w: 1, h: 1, type: 9, col: 0xaaaaaa, asset: 'splitter', interactive: true },
+      { x: 2, y: 5, w: 1, h: 1, type: 6, col: 0xffd700, asset: 'crystal', interactive: true },
+      { x: 8, y: 5, w: 1, h: 1, type: 3, col: 0x00ff00, asset: 'plant', interactive: true },
+      { x: 0, y: 9, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 9, y: 0, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 1, y: 0, w: 2, h: 1, type: 4, col: 0x555555, asset: 'sofa', interactive: true },
+      { x: 9, y: 8, w: 1, h: 2, type: 4, col: 0x555555, asset: 'desk', interactive: true }
+    ]
+  },
+  {
+    name: "Phase 10: Mastery",
+    cols: 12,
+    rows: 10,
+    entities: [
+      { x: 0, y: 0, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
+      { x: 11, y: 9, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
+      { x: 6, y: 0, w: 1, h: 10, type: 4, col: 0x555555, asset: 'desk', interactive: false },
+      { x: 3, y: 0, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true },
+      { x: 9, y: 9, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true },
+      { x: 1, y: 5, w: 1, h: 1, type: 6, col: 0xffd700, asset: 'crystal', interactive: true },
+      { x: 10, y: 5, w: 1, h: 1, type: 3, col: 0x00ff00, asset: 'plant', interactive: true },
+      { x: 2, y: 0, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: true },
+      { x: 10, y: 9, w: 1, h: 2, type: 4, col: 0x555555, asset: 'sofa', interactive: true }
+    ]
+  }
+];
 
     // --- GAME START & LEVEL SELECT LOGIC ---
     function startGame(index: number) {
