@@ -419,7 +419,7 @@ const levels: LevelData[] = [
       { x: 0, y: 1, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
       { x: 5, y: 1, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
       { x: 2, y: 0, w: 1, h: 2, type: 4, col: 0x8b4513, asset: 'desk', interactive: true },
-      { x: 4, y: 1, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: true }
+      { x: 3, y: 1, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: true }
     ]
   },
   {
@@ -433,8 +433,8 @@ const levels: LevelData[] = [
     entities: [
       { x: 1, y: 4, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
       { x: 4, y: 1, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
-      { x: 4, y: 4, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
-      { x: 3, y: 1, w: 1, h: 2, type: 4, col: 0x555555, asset: 'sofa', interactive: true }
+      { x: 4, y: 5, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 4, y: 2, w: 1, h: 3, type: 4, col: 0x555555, asset: 'sofa', interactive: true }
     ]
   },
   {
@@ -448,8 +448,7 @@ const levels: LevelData[] = [
     entities: [
       { x: 0, y: 2, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
       { x: 11, y: 2, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
-      { x: 3, y: 2, w: 1, h: 1, type: 3, col: 0x00ff00, asset: 'plant', interactive: true },
-      { x: 5, y: 0, w: 1, h: 1, type: 4, col: 0x555555, asset: 'desk', interactive: true },
+      { x: 3, y: 3, w: 1, h: 1, type: 3, col: 0x00ff00, asset: 'plant', interactive: true },
       { x: 9, y: 2, w: 1, h: 2, type: 4, col: 0x555555, asset: 'desk', interactive: true }
     ]
   },
@@ -469,7 +468,8 @@ const levels: LevelData[] = [
       { x: 5, y: 3, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
       { x: 1, y: 1, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
       { x: 5, y: 1, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
-      { x: 1, y: 5, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: true }
+    { x: 6, y: 1, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+      { x: 4, y: 1, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: false }
     ]
   },
   {
@@ -498,7 +498,12 @@ const levels: LevelData[] = [
       { x: 7, y: 0, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
       { x: 0, y: 0, w: 1, h: 1, type: 6, col: 0xffd700, asset: 'crystal', interactive: true },
       { x: 7, y: 7, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
-      { x: 6, y: 0, w: 1, h: 2, type: 4, col: 0x555555, asset: 'sofa', interactive: true },
+    { x: 4, y: 1, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+
+                  { x: 2, y: 6, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+
+      { x: 6, y: 0, w: 1, h: 2, type: 4, col: 0x555555, asset: 'sofa', interactive: false },
+      { x: 6, y: 3, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: false },
       { x: 7, y: 6, w: 1, h: 2, type: 4, col: 0x555555, asset: 'desk', interactive: true }
     ]
   },
@@ -527,7 +532,7 @@ const levels: LevelData[] = [
       { x: 3, y: 7, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
       { x: 4, y: 0, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
       { x: 0, y: 4, w: 8, h: 1, type: 4, col: 0x555555, asset: 'desk', interactive: false },
-      { x: 0, y: 2, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true },
+      { x: 0, y: 2, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: false },
       { x: 7, y: 6, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true },
       { x: 3, y: 2, w: 1, h: 1, type: 3, col: 0x00ff00, asset: 'plant', interactive: true },
       { x: 4, y: 7, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
@@ -546,7 +551,10 @@ const levels: LevelData[] = [
       { x: 8, y: 5, w: 1, h: 1, type: 3, col: 0x00ff00, asset: 'plant', interactive: true },
       { x: 0, y: 9, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
       { x: 9, y: 0, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
-      { x: 1, y: 0, w: 2, h: 1, type: 4, col: 0x555555, asset: 'sofa', interactive: true },
+      { x: 1, y: 5, w: 1, h: 3, type: 4, col: 0x555555, asset: 'sofa', interactive: false },
+      { x: 5, y: 0, w: 1, h: 3, type: 4, col: 0x555555, asset: 'sofa', interactive: false },
+      { x: 8, y: 7, w: 1, h: 3, type: 4, col: 0x555555, asset: 'sofa', interactive: false },
+
       { x: 9, y: 8, w: 1, h: 2, type: 4, col: 0x555555, asset: 'desk', interactive: true }
     ]
   },
@@ -558,12 +566,16 @@ const levels: LevelData[] = [
       { x: 0, y: 0, w: 1, h: 1, type: 0, col: 0xffffff, asset: 'source', interactive: false },
       { x: 11, y: 9, w: 1, h: 1, type: 1, col: 0xff00ff, asset: 'receiver', interactive: false },
       { x: 6, y: 0, w: 1, h: 10, type: 4, col: 0x555555, asset: 'desk', interactive: false },
-      { x: 3, y: 0, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true },
+      { x: 3, y: 5, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: false },
       { x: 9, y: 9, w: 1, h: 1, type: 7, col: 0xffff00, asset: 'portal', interactive: true },
       { x: 1, y: 5, w: 1, h: 1, type: 6, col: 0xffd700, asset: 'crystal', interactive: true },
       { x: 10, y: 5, w: 1, h: 1, type: 3, col: 0x00ff00, asset: 'plant', interactive: true },
       { x: 2, y: 0, w: 2, h: 2, type: 4, col: 0x555555, asset: 'bed', interactive: true },
-      { x: 10, y: 9, w: 1, h: 2, type: 4, col: 0x555555, asset: 'sofa', interactive: true }
+      { x: 10, y: 7, w: 1, h: 3, type: 4, col: 0x555555, asset: 'sofa', interactive: false },
+      { x: 11, y: 1, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: false },
+      { x: 5, y: 3, w: 1, h: 1, type: 2, col: 0x00ffff, asset: 'mirror', interactive: true },
+    { x: 3, y: 3, w: 1, h: 1, type: 9, col: 0xaaaaaa, asset: 'splitter', interactive: true },
+
     ]
   }
 ];
