@@ -658,7 +658,7 @@ async function init() {
 
         if (sourceEid === -1) return world;
 
-        let maxReceiverStrength = 0;
+        let totalReceiverStrength = 0;
         let hitReceiver = false;
         
         const rays = [{ x: GridPosition.x[sourceEid], y: GridPosition.y[sourceEid], dx: 1, dy: 0, strength: 100 }];
@@ -682,7 +682,11 @@ async function init() {
                     const hitEid = gridMap.get(key)!;
                     const type = ObjectType.type[hitEid];
 
-                    if (type === 1) { hitReceiver = true; maxReceiverStrength = Math.max(maxReceiverStrength, currentStrength); break; } 
+                    if (type === 1) { 
+                        hitReceiver = true; 
+                        totalReceiverStrength += currentStrength; 
+                        break; 
+                    } 
                     else if (type === 4) break;
                     else if (type === 5) currentStrength -= 30; 
                     else if (type === 3) currentStrength = Math.min(100, currentStrength + 25);
@@ -725,17 +729,17 @@ async function init() {
             }
         }
 
-        updateGameState(hitReceiver ? maxReceiverStrength : 0);
+        updateGameState(hitReceiver ? totalReceiverStrength : 0);
         
         let beamThickness = 6;
         let beamAlpha = 0.5;
         let beamColor = 0xc0392b;
 
-        if (maxReceiverStrength >= 80) {
+        if (totalReceiverStrength >= 80) {
             beamColor = 0x00ced1; 
             beamThickness = 10;   
             beamAlpha = Math.sin(Date.now() / 150) * 0.2 + 0.8; 
-        } else if (maxReceiverStrength > 40) {
+        } else if (totalReceiverStrength > 40) {
             beamColor = 0xd4af37; 
             beamThickness = 6;
             beamAlpha = Math.sin(Date.now() / 300) * 0.15 + 0.6; 
@@ -747,7 +751,7 @@ async function init() {
         if (isSignalMode) {
             signalLine.stroke({ width: beamThickness * 3, color: beamColor, alpha: beamAlpha * 0.2 });
             signalLine.stroke({ width: beamThickness, color: beamColor, alpha: beamAlpha });
-            if (maxReceiverStrength > 40) {
+            if (totalReceiverStrength > 40) {
                 signalLine.stroke({ width: beamThickness * 0.3, color: 0xffffff, alpha: 0.9 });
             }
         } else {
