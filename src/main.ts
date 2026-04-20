@@ -451,7 +451,9 @@ async function init() {
         const showNextMessage = () => {
             if (tutorialQueue.length > 0) {
                 tutorialText.innerText = tutorialQueue.shift()!;
-                tutorialDialog.showModal();
+                if (!tutorialDialog.open) {
+                    tutorialDialog.showModal();
+                }
             } else {
                 tutorialDialog.close();
             }
@@ -461,8 +463,7 @@ async function init() {
             tutorialNextBtn.replaceWith(tutorialNextBtn.cloneNode(true));
             tutorialNextBtn = document.getElementById('tutorial-next-btn');
             tutorialNextBtn?.addEventListener('click', () => {
-                tutorialDialog.close(); 
-                setTimeout(showNextMessage, 50); 
+                showNextMessage(); 
             });
         }
 
@@ -536,7 +537,9 @@ async function init() {
                 nextLevelBtn.innerText = "Next Phase";
             }
             
-            winDialog.showModal();
+            setTimeout(() => {
+                winDialog.showModal();
+            }, 1000);
         } 
     }
 
