@@ -162,7 +162,7 @@ uiLayer.innerHTML = `
     
     <div id="ui-layer">
         <div id="main-menu">
-            <h1>Signal & Sanctuary</h1>
+            <h1>Sanctuary</h1>
             <p>A puzzle of spatial harmony.</p>
             <button id="start-btn" class="primary-btn">Begin Journey</button>
             
@@ -173,7 +173,7 @@ uiLayer.innerHTML = `
         </div>
 
         <div id="hud">
-            <h2>Signal & Sanctuary</h2>
+            <h2>Sanctuary</h2>
             <div id="level-title"></div>
             <div style="display: flex; align-items: baseline; gap: 12px;">
                 <div id="status-text">Signal: 0%</div>
